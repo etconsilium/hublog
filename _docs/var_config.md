@@ -96,3 +96,8 @@ kramdown:
 redcloth:
   hard_breaks: true
 ```
+
+
+пс: судя по дальнейшей документации [http://jekyllrb.com/docs/posts/](http://jekyllrb.com/docs/posts/),
+все переменные этого раздела (которые дальше сливаются с _config.yml) передаются массивом site: `{{ site.url }}`.
+алсо доступен `site.posts` - список постов в каталоге `_posts`
