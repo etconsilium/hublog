@@ -3,32 +3,32 @@
 оригинал [http://jekyllrb.com/docs/configuration/](http://jekyllrb.com/docs/configuration/)
 
 глобальные:
-* source: DIR
-* destination: DIR
-* safe: BOOL
-* exclude: [DIR, FILE, ...]
-* include: [DIR, FILE, ...]
-* timezone: TIMEZONE
 
-конфигурация сборки не поддерживается
+- source: DIR
+- destination: DIR
+- safe: BOOL
+- exclude: [DIR, FILE, ...]
+- include: [DIR, FILE, ...]
+- timezone: TIMEZONE
 
+- конфигурация сборки не поддерживается
+
+- future: BOOL
 Publish posts with a future date.
-*future: BOOL
 
-LSI
+- lsi: BOOL	//	???
 Produce an index for related posts.
-lsi: BOOL	//	???
 
+- limit_posts: NUM
 Limit the number of posts to parse and publish.
-* limit_posts: NUM
 
-серверные конфиги не поддерживаются
+- серверные конфиги не поддерживаются
 
-baseurl: URL
+- baseurl: URL
 
 оригинальная документация пишет: Do not use tabs in configuration files; -- нашим парсерам это всё без разницы, только помните про YAML
 
-Default Configuration
+Default Configuration находится в _configs/default.php
 ```
 source:      .
 destination: ./_site
