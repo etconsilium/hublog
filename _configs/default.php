@@ -1,39 +1,57 @@
 <?php
+//	так как мы уже не соблюдаем условности джекила, сделаем по-своему
 return array(
-'source'=>'.',
-'destination'=>'./_site',
-'plugins'=>'./_plugins',
-'layouts'=>'./_layouts',
-'include'=>array('.htaccess'),
-'exclude'=>array(),
-'keep_files'=>array('.git','.svn'),
-'timezone'=>'Europe/Moscow',
+'path'=>array(
+	'root'=>'.'
+	,'config'=>'./_configs'
+	,'engine'=>'./_engines'
+	,'source'=>'./_posts'
+	,'destination'=>'./_site'
+	,'plugin'=>'./_plugins'
+	,'layout'=>'./_layouts'
+	,'cache'=>'./_site/_hublog_cache'
+	,'tmp'=>'./_site/_hublog_cache'
+)
+,
 
-'future'=>true,
-'show_drafts'=>null,
-'limit_posts'=>0,
-'pygments'=>true,
+	'include'=>array('.htaccess')
+	,'exclude'=>array()
+	,'keep_files'=>array('.git','.svn')
 
-'relative_permalinks'=>true,
+	,'timezone'=>'Europe/Moscow'	//	обязательно, если нет в конфигурации сервера
 
-'permalink'=>'date',
-'paginate_path'=>'page:num',
+	,'leading_numbers'=>false	//	experemental	//	необходимость цифр даты в названии файлов постов, как в джекиле
 
-'markdown'=>'maruku',
-'markdown_ext'=>array('markdown','mkd','mkdn','md'),
-'textile_ext'=>array('textile'),
 
-'excerpt_separator'=>"\n\n",
+	,'future'=>true
+	,'show_drafts'=>null
+	,'limit_posts'=>0
+	,'pygments'=>true	//	втф
 
-'safe'=>false,
-'watch'=>false,    # deprecated
-'server'=>false,    # deprecated
-'host'=>'0.0.0.0',
-'port'=>4000,
-'baseurl'=>'/',
-'url'=>'http://localhost:4000',
-'lsi'=>false,
+	,'relative_permalinks'=>true
 
+	,'permalink'=>'date'
+	,'paginate_path'=>'page:num'
+
+	,'markdown'=>'maruku'
+	,'markdown_ext'=>array('markdown','mkd','mkdn','md')
+	,'textile_ext'=>array('textile')
+
+	,'excerpt_separator'=>"\n\n"	//	втф
+
+,
+'server'=>array(	//	секция не работает для статики
+	'safe'=>false
+	,'cache'=>false		//	experimental
+	,'watch'=>false    # deprecated
+	,'server'=>false    # deprecated
+	,'host'=>'0.0.0.0'
+	,'port'=>4000
+	,'baseurl'=>'/'
+	,'url'=>'http://localhost:4000'
+	,'lsi'=>false
+	)
+,
 'maruku'=>array(
   'use_tex'=>false,
   'use_divs'=>false,
