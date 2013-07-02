@@ -1,45 +1,35 @@
 <?php
-//	yaml http://jekyllrb.com/docs/frontmatter/
 
-define ('LEADING_NUMBERS',false);	//	experemental
-define ('CACHED',false);	//	experemental
-define ('WATCH',false);	//	experemental
+$GLOBALS['config'] = include './_configs/default.php';
 
-//	@see http://jekyllrb.com/docs/configuration/
-define ('DIR_ROOT', '/./');
-define ('DIR_CONFIG','_configs');
-define ('DIR_ENGINE','_engines');
-define ('DIR_TMPL','_layouts');
-define ('DIR_CONTENT','_posts');	//	--source dir
-define ('DIR_DEPLOY','/./');		//	--destination dir
-define ('DIR_CACHE','_hublog_cache');
-
-define ('PATH_ROOT',realpath(($argc>1 ? $argv[1] : dirname(__file__)).DIRECTORY_SEPARATOR.DIR_ROOT));
-define ('PATH_CONFIG',realpath(PATH_ROOT.DIRECTORY_SEPARATOR.DIR_CONFIG));
-define ('PATH_ENGINE',realpath(PATH_ROOT.DIRECTORY_SEPARATOR.DIR_ENGINE));
-define ('PATH_TMPL',realpath(PATH_ROOT.DIRECTORY_SEPARATOR.DIR_TMPL));
-define ('PATH_CONTENT',realpath(PATH_ROOT.DIRECTORY_SEPARATOR.DIR_CONTENT));
-define ('PATH_DEPLOY',realpath(PATH_ROOT.DIRECTORY_SEPARATOR.DIR_DEPLOY));
-define ('PATH_CACHE',realpath( (!empty($_ENV['TEMP']) ? $_ENV['TEMP'] : PATH_TMPL) .DIRECTORY_SEPARATOR.DIR_CACHE) );
+define ('PATH_ROOT',realpath(($argc>1 ? $argv[1] : dirname(__file__)).DIRECTORY_SEPARATOR.$config['path']['root']));
+define ('PATH_CONFIG',realpath(PATH_ROOT.DIRECTORY_SEPARATOR.$config['path']['config']));
+define ('PATH_ENGINE',realpath(PATH_ROOT.DIRECTORY_SEPARATOR.$config['path']['engine']));
+define ('PATH_TMPL',realpath(PATH_ROOT.DIRECTORY_SEPARATOR.$config['path']['layout']));
+define ('PATH_CONTENT',realpath(PATH_ROOT.DIRECTORY_SEPARATOR.$config['path']['source']));
+define ('PATH_DEPLOY',realpath(PATH_ROOT.DIRECTORY_SEPARATOR.$config['path']['destination']));
+define ('PATH_CACHE',realpath( (!empty($_ENV['TEMP']) ? $_ENV['TEMP'] : PATH_TMPL) .DIRECTORY_SEPARATOR.$config['path']['cache']) );
 
 
-require PATH_ENGINE.'/process.php';
+require realpath(PATH_ENGINE.'/process.php');
 
-$gitignore = file_get_contents('.gitignore');
-if (false===strpos('### hublog section ###', $gitignore))
+$gitignore = file_get_contents('.gitignore');		//	hardcode
+var_dump(strpos($gitignore,'### hublog section ###'),false===strpos($gitignore,'### hublog section ###'));
+if (false===strpos($gitignore,'### hublog section ###'))
 {
 	file_put_contents('.gitignore',$gitignore
 					  .PHP_EOL
 					  .PHP_EOL
 					  .'### hublog section ###'.PHP_EOL
-					  .DIR_CONFIG.PHP_EOL
-					  .DIR_ENGINE.PHP_EOL
-					  .DIR_TMPL.PHP_EOL
+					  .$config['path']['config'].PHP_EOL
+					  .$config['path']['engine'].PHP_EOL
+					  .$config['path']['layout'].PHP_EOL
 					  //.DIR_CACHE.PHP_EOL
 					  .PHP_EOL
 					  );
 }
 
+//	читаем дерево
 function dirtree($dir='.') {
 	$result=array();
     $list = scandir($dir);
@@ -63,6 +53,7 @@ function dirtree($dir='.') {
 
 $a=dirtree(PATH_CONTENT);
 var_dump($a);
+
 print 'ok';
 print PHP_EOL;
 ?>

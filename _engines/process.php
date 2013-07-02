@@ -7,25 +7,25 @@
 
 if (!function_exists('yaml_parse'))
 {
-	require_once DIR_ENGINE.'/yaml/Spyc.php';
+	require_once PATH_ENGINE.'/yaml/Spyc.php';
 	function yaml_parse_file($filename) {
 		return Spyc::YAMLLoadString($filename);
 	}
 }
 if (!function_exists('yaml_parse_file'))
 {
-	require_once DIR_ENGINE.'/yaml/Spyc.php';
+	require_once PATH_ENGINE.'/yaml/Spyc.php';
 	function yaml_parse_file($filename) {
 		return Spyc::YAMLLoad($filename);
 	}
 }
 
 
-require_once DIR_ENGINE.'/Twig/Autoloader.php';
+require_once PATH_ENGINE.'/Twig/Autoloader.php';
 Twig_Autoloader::register();
 $loader = new Twig_Loader_String();
 $twig = new Twig_Environment($loader, array(
-	'cache'       => DIR_CACHE,
+	'cache'       => PATH_CACHE,
 	'auto_reload' => false	//	ибо бесполезно
 ));
 
@@ -34,7 +34,7 @@ function render($tmpl,$var) {
 	return $twig->render($tmpl,$var);
 }
 
-require_once DIR_ENGINE.'/markdown/markdown.php';
+require_once PATH_ENGINE.'/markdown/markdown.php';
 
 function process($source_filename,$target_filename,$variable=array()) {
 	//$yaml_config = yaml_parse_file($source_filename);	//	оба парсера работают неудовлетворительно
