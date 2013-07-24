@@ -8,8 +8,8 @@
 if (!function_exists('yaml_parse'))
 {
 	require_once PATH_ENGINE.'/yaml/Spyc.php';
-	function yaml_parse_file($filename) {
-		return Spyc::YAMLLoadString($filename);
+	function yaml_parse($string) {
+		return Spyc::YAMLLoadString($string);
 	}
 }
 if (!function_exists('yaml_parse_file'))
@@ -36,22 +36,20 @@ function render($tmpl,$var) {
 
 require_once PATH_ENGINE.'/markdown/markdown.php';
 
-function process($source_filename,$target_filename,$variable=array()) {
-	//$yaml_config = yaml_parse_file($source_filename);	//	оба парсера работают неудовлетворительно
-	$origin=trim(file_get_contents($source_filename));
-	if (strlen($origin))
-	{
-		$ar=explode('---',$origin);
-		if (''===$ar[0])	//	считаем, что это yaml-front-matter и парсим его на конфиг
-		{
-			$variable=array_merge_recursive(yaml_parse($ar[1]),$variable);
-			$origin=trim(implode('---',array_slice($ar,2)));
-		}
-		var_dump($variable,$origin);
+function parse_file($source_filename,$variable=array()) {
 
-		//	надо собрать все переменные
+}
+function cr8_path($path) {
 
+}
+function copy_file($source_filename,$target_filename) {
 
-	}
+}
+function cr8_url($from,$rule) {
+
+}
+function get_date($filename) {
+	$filename=basename($filename);
+
 }
 ?>

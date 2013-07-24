@@ -11,12 +11,14 @@ return array(
 	,'layout'=>'./_layouts'
 	,'cache'=>'./_site/_hublog_cache'
 	,'tmp'=>'./_site/_hublog_cache'
-)
-,
 
-	'include'=>array('.htaccess')
-	,'exclude'=>array()
-	,'keep_files'=>array('.git','.svn')
+)
+
+	,'files'=>array(	//	extensions
+		'parse'=>array('md','markdown','txt','html','phtml')
+		,'exclude'=>array()
+		,'keep'=>array('.git','.svn','_svn','_git')	//	полностью имена файлов, которые не надо трогать
+		)
 
 	,'timezone'=>'Europe/Moscow'	//	обязательно, если нет в конфигурации сервера
 

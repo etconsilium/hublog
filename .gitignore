@@ -50,3 +50,9 @@ sftp-config*.json
 ###KomodoEdit###
 
 *.komodoproject
+
+### hublog section ###
+./_configs
+./_engines
+./_layouts
+
