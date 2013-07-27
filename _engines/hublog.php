@@ -7,7 +7,8 @@ final class Hublog {
 						 //,'PAGINATOR'=>array()	//	current page
 						 //);
 
-	static $pages=array(/*rel_path=>array(name,realname,)*/);	//	see dirtree()
+	static $files=array(/*rel_path=>array(name,realname,)*/);	//	see dirtree()
+	static $pages=array(/*rel_path=>array(content,url,)*/);
 
 /*********************************************/
 
@@ -33,26 +34,32 @@ final class Hublog {
 							'name'=>$name
 							,'extension'=>($ext=array_pop( explode('.',$name)))
 							,'realname'=>$path
-							,'parse'=>(!in_array($ext,Hublog::$default['files']['exclude']) && in_array($ext,Hublog::$default['files']['parse']))
-							,'copy'=>(!in_array($ext,Hublog::$default['files']['exclude']) && !in_array($name,Hublog::$default['files']['keep']))
+							,'parsed'=>(!in_array($ext,Hublog::$default['files']['exclude']) && in_array($ext,Hublog::$default['files']['parse']))
+							,'copied'=>(!in_array($ext,Hublog::$default['files']['exclude']) && !in_array($name,Hublog::$default['files']['keep']))
 						);
 					}
 				}
 			}
 		}
+		Hublog::$files=$result;
 		return $result;
 	}
 
 	//	step 2 :: парсим линейный массив для конфига SITE
 	static function step2($file_array=array()){
-		!count($file_array) ? $file_array=Hublog::step1(HUBLOG_PATH_CONTENT) : null;
+		if (!count($file_array)) $file_array=Hublog::step1(HUBLOG_PATH_CONTENT) ;
 
 		$posts=array();
 		$categories=$tags=array();
 
 		while (list($relative_path,$file) = each($file_array))
 		{
-			if (!$file['parse']) continue;
+			if (!$file['parsed']) {
+				if ($file['copied'])
+					Hublog::copy_file();
+					
+				continue;
+			}
 
 			//	попарсить файл
 			$date=Hublog::date_from_file($file['realname']);
@@ -125,9 +132,27 @@ final class Hublog {
 		return Hublog::$pages;
 	}
 
-	//	парсим шаблонизатором
+	//	парсим шаблонизатором и пишем
 	static function step3($pages_array=array()){
-		!count($pages_array) ? $pages_array=Hublog::step2() : null;
+		if (!count($pages_array)) $pages_array=Hublog::step2() ;
+
+		Twig_Autoloader::register();
+		$loader = new Twig_Loader_String();
+		$twig = new Twig_Environment($loader, array(
+			'cache'       => HUBLOG_PATH_CACHE,
+			'auto_reload' => false	//	ибо бесполезно
+		));
+		while (list(,$page)=each($pages_array)){
+			$target=$twig->render($page['content'],array(
+				'site'=>array_merge_recursive(Hublog::$default,Hublog::$site)
+				,'page'=>$page
+				,'content'=>$page['content']
+				,'paginator'=>array()
+			));
+
+			$filename=realpath(HUBLOG_PATH_DEPLOY.DIRECTORY_SEPARATOR.$page['url']);
+			file_put_contents($filename,$target);
+		}
 	}
 
 	static function date_from_file($file){
