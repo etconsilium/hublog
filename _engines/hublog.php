@@ -57,7 +57,7 @@ final class Hublog {
 			if (!$file['parsed']) {
 				if ($file['copied'])
 					Hublog::copy_file();
-					
+
 				continue;
 			}
 
@@ -170,6 +170,7 @@ final class Hublog {
 						  );
 	}
 
+	static function copy_file($source_name,$target_name){}
 
 	static function prepare_gitignore(){
 		$gitignore = file_get_contents('.gitignore');		//	hardcode
