@@ -7,21 +7,21 @@
 
 if (!function_exists('yaml_parse'))
 {
-	require_once PATH_ENGINE.'/yaml/Spyc.php';
+	require_once HUBLOG_PATH_ENGINE.'/yaml/Spyc.php';
 	function yaml_parse($string) {
 		return Spyc::YAMLLoadString($string);
 	}
 }
 if (!function_exists('yaml_parse_file'))
 {
-	require_once PATH_ENGINE.'/yaml/Spyc.php';
+	require_once HUBLOG_PATH_ENGINE.'/yaml/Spyc.php';
 	function yaml_parse_file($filename) {
 		return Spyc::YAMLLoad($filename);
 	}
 }
 
 
-require_once PATH_ENGINE.'/Twig/Autoloader.php';
+require_once HUBLOG_PATH_ENGINE.'/Twig/Autoloader.php';
 Twig_Autoloader::register();
 $loader = new Twig_Loader_String();
 $twig = new Twig_Environment($loader, array(
@@ -34,22 +34,23 @@ function render($tmpl,$var) {
 	return $twig->render($tmpl,$var);
 }
 
-require_once PATH_ENGINE.'/markdown/markdown.php';
+require_once HUBLOG_PATH_ENGINE.'/markdown/markdown.php';
 
-function parse_file($source_filename,$variable=array()) {
+if (!function_exists('array_column'))
+{
+	function array_column($input, $column_key, $index_key=null){
+		if (!array_key_exists($column_key,$input[0]))	return	null;
+		if (!empty($index_key) && !array_key_exists($index_key,$input[0]))	return	null;
 
-}
-function cr8_path($path) {
+		$a=array(); reset($input);
+		if (empty($index_key))
+			while (list(,$v)=each($input))
+				$a[]=$v[$column_key];
+		else
+			while (list(,$v)=each($input))
+				$a[$v[$index_key]]=$v[$column_key];
 
-}
-function copy_file($source_filename,$target_filename) {
-
-}
-function cr8_url($from,$rule) {
-
-}
-function get_date($filename) {
-	$filename=basename($filename);
-
+		return $a;
+	}
 }
 ?>

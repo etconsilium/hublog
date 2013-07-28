@@ -27,7 +27,7 @@ final class Hublog {
 					$path = realpath($rel_path = ($dir . DIRECTORY_SEPARATOR . $name));
 
 					if (is_dir($path) && !in_array(basename($path),Hublog::$default['files']['keep'])) {
-						$result = array_merge($result,dirtree($rel_path));
+						$result = array_merge($result,Hublog::step1($rel_path));
 					}
 					if (is_file($path)) {	//	ничего не парсится
 						$result[$rel_path] = array(
@@ -62,7 +62,7 @@ final class Hublog {
 			}
 
 			//	попарсить файл
-			$date=Hublog::date_from_file($file['realname']);
+			$date=Hublog::date_from_file($file);
 			$posts[]=array('date'=>$date,'post'=>$relative_path);
 
 			$origin=file_get_contents($file['realname']);
@@ -134,7 +134,11 @@ final class Hublog {
 
 	//	парсим шаблонизатором и пишем
 	static function step3($pages_array=array()){
+		//	@TODO: где-то забыли шаблон layout
+		
 		if (!count($pages_array)) $pages_array=Hublog::step2() ;
+
+		require_once HUBLOG_PATH_ENGINE.'/markdown/markdown.php';
 
 		Twig_Autoloader::register();
 		$loader = new Twig_Loader_String();
@@ -150,8 +154,12 @@ final class Hublog {
 				,'paginator'=>array()
 			));
 
-			$filename=realpath(HUBLOG_PATH_DEPLOY.DIRECTORY_SEPARATOR.$page['url']);
-			file_put_contents($filename,$target);
+			//$filename=realpath(HUBLOG_PATH_DEPLOY.DIRECTORY_SEPARATOR.$page['url']);
+			$filename=HUBLOG_PATH_DEPLOY.$page['url'];	//	грязный хак
+			$dirname=dirname( $filename=str_replace(array('\\/','\\\\','\\','/'),DIRECTORY_SEPARATOR,$filename) );	//	чистый хак
+			if (!is_dir($dirname))	mkdir($dirname,0755,true);
+
+			file_put_contents($filename, Markdown($target) );
 		}
 	}
 
@@ -163,14 +171,14 @@ final class Hublog {
 		//	rule  Hublog::$config['MAIN']['permalink']
 		//	@TODO доделать разные правила
 		return
-			(Hublog::$config['SITE']['server']['baseurl'])
+			(Hublog::$default['server']['baseurl'])
 			. preg_replace('~^(\d{4})-(\d\d)-(\d\d)-(.+)~'
 						   , '$1/$2/$3/$4'
 						   , str_replace('.'.$file['extension'], '.html', $file['name'])
 						  );
 	}
 
-	static function copy_file($source_name,$target_name){}
+	static function copy_file($source_name=null,$target_name=null){}
 
 	static function prepare_gitignore(){
 		$gitignore = file_get_contents('.gitignore');		//	hardcode
