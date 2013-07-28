@@ -159,7 +159,7 @@ final class Hublog {
 		list($year,$month,$day)=preg_split('~-~',$file['name'],3);
 		return mktime(0,0,0,$month,$day,$year) ?: filemtime($file['realname']);
 	}
-	static function create_page_url($file){
+	static function create_page_url($file,$rule=null/*function*/){
 		//	rule  Hublog::$config['MAIN']['permalink']
 		//	@TODO доделать разные правила
 		return
