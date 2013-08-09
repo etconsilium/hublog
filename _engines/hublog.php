@@ -29,7 +29,7 @@ final class Hublog {
 					if (is_dir($path) && !in_array(basename($path),Hublog::$default['files']['keep'])) {
 						$result = array_merge($result,Hublog::step1($rel_path));
 					}
-					if (is_file($path)) {	//	ничего не парсится
+					if (is_file($path)) {
 						$result[$rel_path] = array(
 							'name'=>$name
 							,'extension'=>($ext=array_pop( explode('.',$name)))
@@ -74,10 +74,10 @@ final class Hublog {
 				$a_orig=explode('---',$origin);
 				if (''===trim($a_orig[0]))	//	считаем, что это yaml-front-matter и парсим его на конфиг
 				{
-					$yaml=array_merge_recursive(
+					$yaml=array_merge(
 						array('title'=>basename($file['name'])
 							  ,'date'=>$date
-							  ,'layout'=>'default')
+							  ,'layout'=>'default.html')
 						,yaml_parse($a_orig[1])
 					);
 					$content=trim(implode('---',array_slice($a_orig,2)));
@@ -107,7 +107,7 @@ final class Hublog {
 					);
 					}
 
-					Hublog::$pages[$relative_path] = array_merge_recursive(
+					Hublog::$pages[$relative_path] = array_merge(
 						$yaml
 						,array(
 							'content'=>$content
@@ -135,29 +135,37 @@ final class Hublog {
 	//	парсим шаблонизатором и пишем
 	static function step3($pages_array=array()){
 		//	@TODO: где-то забыли шаблон layout
-		
+
 		if (!count($pages_array)) $pages_array=Hublog::step2() ;
 
 		require_once HUBLOG_PATH_ENGINE.'/markdown/markdown.php';
 
 		Twig_Autoloader::register();
-		$loader = new Twig_Loader_String();
+		$loader = new Twig_Loader_Filesystem( HUBLOG_PATH_TMPL );
 		$twig = new Twig_Environment($loader, array(
-			'cache'       => HUBLOG_PATH_CACHE,
-			'auto_reload' => false	//	ибо бесполезно
+			'cache'       => HUBLOG_PATH_CACHE
+			,'auto_reload' => false	//	ибо бесполезно
+//			,'layout'=>realpath(HUBLOG_PATH_TMPL.DIRECTORY_SEPARATOR.$page['layout'])
 		));
-		while (list(,$page)=each($pages_array)){
-			$target=$twig->render($page['content'],array(
-				'site'=>array_merge_recursive(Hublog::$default,Hublog::$site)
-				,'page'=>$page
-				,'content'=>$page['content']
-				,'paginator'=>array()
-			));
 
-			//$filename=realpath(HUBLOG_PATH_DEPLOY.DIRECTORY_SEPARATOR.$page['url']);
-			$filename=HUBLOG_PATH_DEPLOY.$page['url'];	//	грязный хак
+		while (list(,$page)=each($pages_array)){
+
+			$target=$twig->loadTemplate( $page['layout'] )
+				->render(
+					array(
+						'site'=>array_merge_recursive(Hublog::$default,Hublog::$site)
+						,'page'=>$page
+						,'content'=>$page['content']
+						,'paginator'=>array()
+						)
+				);
+
+			$filename=HUBLOG_PATH_DEPLOY.$page['url'];
 			$dirname=dirname( $filename=str_replace(array('\\/','\\\\','\\','/'),DIRECTORY_SEPARATOR,$filename) );	//	чистый хак
 			if (!is_dir($dirname))	mkdir($dirname,0755,true);
+
+			var_dump($page['path'],$page['url'],$filename,$dirname,'-----');
+			//var_dump($page,'-----');
 
 			file_put_contents($filename, Markdown($target) );
 		}
@@ -171,11 +179,14 @@ final class Hublog {
 		//	rule  Hublog::$config['MAIN']['permalink']
 		//	@TODO доделать разные правила
 		return
-			(Hublog::$default['server']['baseurl'])
-			. preg_replace('~^(\d{4})-(\d\d)-(\d\d)-(.+)~'
-						   , '$1/$2/$3/$4'
-						   , str_replace('.'.$file['extension'], '.html', $file['name'])
-						  );
+			str_replace(array('\\/','\\\\','\\','//'),'/',	//	нормализация
+				(Hublog::$default['server']['baseurl'])
+				. str_replace(array(HUBLOG_PATH_CONTENT,$file['name']),'',$file['realname'])
+				. preg_replace('~^(\d{4})-(\d\d)-(\d\d)-(.+)~'
+							   , '$1/$2/$3/$4'
+							   , str_replace('.'.$file['extension'], '.html', $file['name'])
+							  )
+			);
 	}
 
 	static function copy_file($source_name=null,$target_name=null){}
@@ -216,64 +227,8 @@ final class Hublog {
 				,'tags'=>array(/*'TAG'=>array()*/)	//	после парсинга 	//	The list of all Posts with tag `TAG`.
 			)
 		);
-		//Hublog::$page=array(
-		//	'content'=>''	//	The un-rendered content of the Page.
-		//	,'title'=>''	//	The title of the Post.
-		//	,'excerpt'=>''	//	The un-rendered excerpt of the Page.
-		//	,'url'=>''	//	The URL of the Post without the domain, but with a leading slash, e.g. /2008/12/14/my-post.html
-		//	,'date'=>''	//	The Date assigned to the Post. This can be overridden in a Post’s front matter by specifying a new date/time in the format YYYY-MM-DD HH:MM:SS
-		//	,'id'=>''	//	An identifier unique to the Post (useful in RSS feeds). e.g. /2008/12/14/my-post
-		//	,'categories'=>array()	//	The list of categories to which this post belongs. Categories are derived from the directory structure above the _posts directory. For example, a post at /work/code/_posts/2008-12-24-closures.md would have this field set to ['work', 'code']. These can also be specified in the YAML Front Matter.
-		//	,'tags'=>array()	//	The list of tags to which this post belongs. These can be specified in the YAML Front Matter.
-		//	,'path'=>''	//	The path to the raw post or page. Example usage: Linking back to the page or
-		//);
-		//Hublog::$paginator=array(	//	тоже формировать на момент парсинга (не рендеринга)
-		//	'per_page'=>''	//	Number of Posts per page.
-		//	,'posts'=>''	//	Posts available for that page.
-		//	,'total_posts'=>''	//	Total number of Posts.
-		//	,'total_pages'=>''	//	Total number of Pages.
-		//	,'page'=>''	//	The number of the current page.
-		//	,'previous_page'=>''	//	The number of the previous page.
-		//	,'previous_page_path'=>''	//	The path to the previous page.
-		//	,'next_page'=>''	//	The number of the next page.
-		//	,'next_page_path'=>''	//	The path to the next page.
-		//);
 
 		return Hublog::$site;
-	}
-
-	static function yml($config=array()){
-		Hublog::$config['YML']=array_merge_recursive((is_readable($f=HUBLOG_PATH_ROOT.'/_config.yml')?yaml_parse_file($f):array()),$config);
-	}
-	static function site($config=array()){
-		Hublog::$config['SITE']=
-		array_merge_recursive(
-							  Hublog::$config['MAIN']
-							  ,array(
-			'time'=>time()	//	обновлять или не обновлять при парсинге? The current time (когда скрипт запускается), выставлено по таймзоне
-			,'posts'=>rsort(array_keys($source_tree))	// пока пусть так будет. но надо брать дату из парсинга A reverse chronological list of all Posts. список содержимого каталога /_posts
-			,'related_posts'=>array()	//	тоже брать после парсинга	//	какая-то магия: If the page being processed is a Post, this contains a list of up to ten related Posts. By default, these are low quality but fast to compute. For high quality but slow to compute results, run the jekyll command with the --lsi (latent semantic indexing) option.
-			,'categories'=>array(/*'CATEGORY'=>array()*/)	//	после парсинга 	//	(The list of all Posts in category `CATEGORY`.)
-			,'tags'=>array(/*'TAG'=>array()*/)	//	после парсинга 	//	The list of all Posts with tag `TAG`.
-			)
-							  ,Hublog::$config['YML']	//	другие переменные (All the variables set via the command line and your /_config.yml are available through the site variable. For example, if you have url: http://mysite.com in your configuration file, then in your Posts and Pages it will be stored in site.url. Jekyll does not parse changes to /_config.yml in watch mode, you must restart Jekyll to see changes to variables.
-							  ,$config);
-
-	}
-	static function page($config=array()){
-		return array_merge_recursive(array()
-			,$config);
-	}
-	static function paginator($config=array()){
-		return array_merge_recursive(array()
-			,$config);
-	}
-	static function yaml($config=array()){
-		return array_merge_recursive(array(),
-			array('title'=>''
-				  ,'date'=>''
-				 )
-			,$config);
 	}
 }
 return Hublog::init();
