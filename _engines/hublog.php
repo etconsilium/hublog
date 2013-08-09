@@ -140,21 +140,25 @@ final class Hublog {
 
 		require_once HUBLOG_PATH_ENGINE.'/markdown/markdown.php';
 
+		$mrkdwn = new Markdown_Parser();
+
 		Twig_Autoloader::register();
 		$loader = new Twig_Loader_Filesystem( HUBLOG_PATH_TMPL );
+
 		$twig = new Twig_Environment($loader, array(
 			'cache'       => HUBLOG_PATH_CACHE
 			,'auto_reload' => false	//	ибо бесполезно
+			,'autoescape' => false	//	дефолтно включен
 //			,'layout'=>realpath(HUBLOG_PATH_TMPL.DIRECTORY_SEPARATOR.$page['layout'])
 		));
 
 		while (list(,$page)=each($pages_array)){
 
-			$target=$twig->loadTemplate( $page['layout'] )
-				->render(
+			$target=$twig->loadTemplate( $page['layout'] );
+			$tpl=$target->render(
 					array(
 						'site'=>array_merge_recursive(Hublog::$default,Hublog::$site)
-						,'page'=>$page
+						,'page'=>array_merge($page,array('content'=>Markdown($page['content'])))
 						,'content'=>$page['content']
 						,'paginator'=>array()
 						)
@@ -164,10 +168,7 @@ final class Hublog {
 			$dirname=dirname( $filename=str_replace(array('\\/','\\\\','\\','/'),DIRECTORY_SEPARATOR,$filename) );	//	чистый хак
 			if (!is_dir($dirname))	mkdir($dirname,0755,true);
 
-			var_dump($page['path'],$page['url'],$filename,$dirname,'-----');
-			//var_dump($page,'-----');
-
-			file_put_contents($filename, Markdown($target) );
+			file_put_contents($filename, $tpl );
 		}
 	}
 
