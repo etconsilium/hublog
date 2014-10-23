@@ -1,3 +1,5 @@
+deprecated. see https://github.com/etconsilium/applejackyll
+
 hublog
 ======
 (читается Hub-Log [хаб-лог])
